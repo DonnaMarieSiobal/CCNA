@@ -1,0 +1,99 @@
+D1:
+config t
+vlan 11
+name comelec.gov.ph
+Interface vlan 11
+ desc comelec.gov.ph
+ no shut
+ ip add 10.0.2.1 255.255.254.0
+ip dhcp excluded-add 10.0.2.1 10.0.2.50
+ip dhcp pool comelec.gov.ph
+ network 10.0.2.0 255.255.254.0
+ domain-name comelec.gov.ph
+ dns-server 8.8.8.8
+ default-router 10.0.2.1
+end
+
+@A1
+conf t
+int e0/0
+switchport mode access
+switchport access vlan 3
+end
+sh vlan br
+
+@P1
+conf t
+int e0/0
+no shut
+ip add dhcp
+do bp
+
+
+For AccentureBSP.com
+@C1
+config t
+vlan 4
+name AccentureBSP.com
+exit
+Interface vlan 4
+ desc AccentureBSP.com
+ no shut
+ ip add 10.0.0.33 255.255.255.224
+exit
+ip dhcp excluded-add 10.0.0.33 10.0.0.35
+ip dhcp pool AccentureBSP.com
+ network 10.0.0.32 255.255.255.224
+ domain-name AccentureBSP
+ dns-server 8.8.8.8
+ default-router 10.0.0.33
+end
+
+@A2
+conf t
+int e1/0
+switchport mode access
+switchport access vlan 4
+end
+sh vlan br
+
+@P2
+conf t
+int e1/0
+no shut
+ip add dhcp
+do bp
+
+For Accenture-SG.com
+@C1
+config t
+vlan 13
+name Accenture-SG.com
+exit
+Interface vlan 13
+ desc Accenture-SG.com
+ no shut
+ ip add 10.0.4.1 255.255.252.0
+exit
+ip dhcp excluded-add 10.0.4.1 10.0.4.100
+ip dhcp pool Accenture-SG.com
+ network 10.0.4.0 255.255.252.0
+ domain-name Accenture-SG.com
+ dns-server 8.8.8.8
+ default-router 10.0.4.1
+end
+
+@C2
+conf t
+int e1/0
+switchport mode access
+switchport access vlan 13
+end
+sh vlan br
+
+@S2
+conf t
+int e1/0
+no shut
+ip add dhcp
+
