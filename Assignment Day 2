@@ -1,4 +1,6 @@
-D1:
+COMELEC
+
+@D1
 config t
 vlan 11
 name comelec.gov.ph
@@ -18,7 +20,7 @@ end
 conf t
 int e0/0
 switchport mode access
-switchport access vlan 3
+switchport access vlan 11
 end
 sh vlan br
 
@@ -30,7 +32,7 @@ ip add dhcp
 do bp
 
 
-For AccentureBSP.com
+ARMY
 @C1
 config t
 vlan 4
