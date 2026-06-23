@@ -97,4 +97,5 @@ conf t
 int e1/0
 no shut
 ip add dhcp
+do bp
 
