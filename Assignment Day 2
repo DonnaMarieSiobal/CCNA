@@ -84,7 +84,7 @@ ip dhcp pool DPWH.GOV.PH
  default-router 10.0.8.1
 end
 
-@C2
+@D2
 conf t
 int e1/0
 switchport mode access
