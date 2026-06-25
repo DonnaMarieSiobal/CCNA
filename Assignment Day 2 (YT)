@@ -1,0 +1,58 @@
+Design and implement a network for Concentrix.com with 27 Data Analyst, Managrs, and Incident Responders.
+- Use the available IP address space 192.168.119.224/27
+-Reserve the first 2 IP addresses of the network
+Set the network for VLAN 97
+-D1 must be the DHCP Server
+-P2 must be the DHCP Client
+
+--COMPUTATION--
+Convert: 27 = 5 bits
+Subtract: 32-5 = /27
+Ipasok 3i sa 4th octet = 192.168.120.0/27
+
+--Netwrork IP (Company) = 192.168.120.0 255.255.255.224
+--Valid Range: 
+  First Valid IP: 192.168.120.1
+  Last Valid IP: 192.168.120.30
+Broadcast IP: 192.168.120.31
+
+NOT Network: (NOT Company) = 192.168.120.32 255.255.255.224
+
+@D1
+conf t
+  vlan 97
+    name CONCENTRIX
+  exit
+int vlan 97
+  ip address 192.168.120.1 255.255.255.224
+  no shut
+  exit
+ip dhcp excluded-address 192.168.120.1 192.168.120.2
+ip dhcp pool CONCENTRIX
+network 192.168.120.0 255.255.255.224
+default-router 192.168.120.1
+domain-name CONCENTRIX.COM
+dns-server 192.168.120.1
+end
+
+@A2
+conf t
+ vlan 97
+  name CONCENTRIX
+exit
+  int e1/0 
+    swithcport mode access
+    switchport access vlan 97
+  end
+
+@P2
+conf t
+  int e1/0
+    no shut
+    ip add dhcp
+end
+sh ip int br | ex una
+
+
+
+
