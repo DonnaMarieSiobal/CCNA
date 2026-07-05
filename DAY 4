@@ -1,0 +1,116 @@
+web server for online games
+yum install - nginx
+
+Firewall Task 1: you are hired: Firewall specialist
+bet10.com allow permit only two ports http:80, https:443
+bet11.com allow permit ping/icmp, dns;53, ssh:22
+
+Protocol	Hacker/source	victim/destination 	port
+
+conf t
+no ip access-list extended FWP1
+ip access-list extended FWP1
+permit tcp any host bet10.com eq 80
+permit tcp any host bet10.com eq 443
+permit icmp any host bet11.com
+permit tcp any host bet11.com eq 53
+permit tcp any host bet11.com eq 22
+int gi 3
+ip access-group FWP1 in
+do sh ip access-list FWP1
+
+Task 2: 
+Voice bet10.com allow/permit only SCCP:2000, SIP: 5060/5061
+bet11.com allow 80: HTTP, 443: HTTPS, 53: DNS
+
+conf t
+no ip access-list extended FWP2
+ip access-list extended FWP2
+permit tcp any host bet10.com eq 2000
+permit tcp any host bet10.com eq 5060
+permit tcp any host bet10.com eq 5061
+permit tcp any host bet11.com eq 443
+permit tcp any host bet11.com eq 80
+permit tcp any host bet11.com eq 53
+int gi 3
+ip access-group FWP2 in
+do sh ip access-list FWP2
+
+Task 3: 
+bet10.com allow/permit only SSH: 22, DNS:53, HTTP:443, SCCP: 2000
+bet11.com allow 443:HTTPS, 80:HTTP. 5060:SIPS
+
+conf t
+no ip access-list extended FWP3
+ip access-list extended FWP3
+permit tcp any host bet10.com eq 22
+permit tcp any host bet10.com eq 53
+permit tcp any host bet10.com eq 443
+permit tcp any host bet10.com eq 2000
+permit tcp any host bet11.com eq 443
+permit tcp any host bet11.com eq 80
+permit tcp any host bet11.com eq 5060
+int gi 3
+ip access-group FWP3 in
+do sh ip access-list FWP3
+
+Port Address translation + Network Address Translation
+
+Bet10.com 
+Insidelocal		insideglobal/outside
+192.168.103.10:80	208.8.8.88:80
+192.168.103.10:443	208.8.8.88:443
+
+Bet11.com 
+Insidelocal		insideglobal/outside
+192.168.103.11:80	208.8.8.69:8080
+192.168.103.11:443	208.8.8.69:8443
+
+betlog.com 
+config t
+no access-list 8
+access-list 8 permit host 192.168.103.10
+access-list 8 permit host 192.168.103.11
+ip host betlog.com 208.8.8.69
+Int Gi 3
+ ip nat Inside
+Int gi 1
+ ip nat Outside
+IP Nat inside source static tcp 192.168.103.10 80 208.8.8.69 80
+IP Nat inside source static tcp 192.168.103.10 443 208.8.8.69 443
+IP Nat inside source static tcp 192.168.103.11 80 208.8.8.69 8080
+IP Nat inside source static tcp 192.168.103.11 443 208.8.8.69 8443
+IP nat inside source list 8 int gi 1 Overload
+end
+show ip nat translation
+
+
+CCNA Security Lab3: Configuring public key & ssh:
+
+Step 1: Generate a publickey:keykeymo
+conf t
+ip domain name keykeymo.com
+crypo key generate rsa modulus 1024
+
+Step 2; Use the publickey:
+conf t
+ip ssh version 2
+end
+sh ip ssh
+
+Step 3: windows pc will download key:
+
+AAAAB3NzaC1yc2EAAAADAQABAAABAQCaJkNYuL5VICoeTpJkcwkPeYLCcKr/Y+jq
+SRsodxYIcGr9gcIFAVjhd6mA/9uAh0Y9dJun9tJAajot7chFSPRISkWhQROnOa2H
+hM9XoNqM+UK8Rbo8S+/uhAnkjWTmVNlyF4KskaeA4xT+zvioxrupUohPPv3hmVO2
+XhaH7BieA4GYLqqTLUqg8T9sRc5o3NUkDmLBOHmjxri0NKw/Gi+NS5F8RG4uHomt
+qGkBTeAbmqcJWhSKyDKWlOOLu33a5PyVCg5DTESUZdFUbLs27Rm6aaK9AahFWb7z
+EsS38YGKeY0gVIxrCVQRoKj3+IVIwS4FVNZilm1ZSFlF36taTV4N
+
+Task4: the task that will change ur life
+
+
+
+
+
+
