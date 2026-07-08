@@ -175,3 +175,170 @@ SAVE THE CONFIGURATIONS. (Do this only on the exam)
 copy run start
 wr
 wr mem
+
+Version 2
+
+TASKS
+Services must be configured in the order presented to complete the implementation.
+
+1. Configure dynamic one-to-one address mapping on R2 using a standard list named XLATE, which allows all traffic to translate the source address of R3 to a pool named test_pool using the 10.10.10.0/24 network for traffic sent from R3 to R1.
+Avoid using an NVI configuration.
+
+Verify reachability by sending a ping to 192.168.100.1 from R3.
+2. Configure R3 to dynamically receive an IP address on Ethernet0/2 from the DHCP server.
+3. Configure R1 as an NTP server and R2 as a client, not as a peer,
+using the IP address 10.1.2.1.
+4. Configure SSH access from R1 to R3, while excluding access via other remote connection protocols using the user root and password s3cret on router R3 using RSA.
+Verify connectivity from router R1 to R3 using a destination address assigned to interface E0/2 on R3.
+
+SOLUTION
+
+1. Configure dynamic one-to-one address mapping on R2 using a standard list named XLATE, which allows all traffic to translate the source address of R3 to a pool named test_pool using the 10.10.10.0/24 network for traffic sent from R3 to R1.
+
+Avoid using an NVI configuration.
+
+Let's create the ACL first that will match traffic from coming from any of R3's interfaces.
+
+@R2
+conf t
+ ip access-list standard XLATE
+  permit 10.2.3.3
+  permit 192.168.3.1
+  permit 10.1.3.11
+  end
+Then we need a NAT pool for translating addresses. It is specified to use all IPs from the network 10.10.10.0/24
+
+Which means the first valid IP will be 10.10.10.1
+
+And the last valid IP will be 10.10.10.254
+
+@R2
+conf t
+ ip nat pool test_pool 10.10.10.1 10.10.10.254 netmask 255.255.255.0
+ end
+Finally, complete the NAT configurations by specifying INSIDE and OUTSIDE interfaces.
+
+Followed with the INSIDE NAT configuration.
+
+@R2
+conf t
+ int e0/1
+  ip nat inside
+  exit
+ int e0/0
+  ip nat outside
+  exit
+ ip nat inside source list XLATE pool test_pool
+ end
+This command simply says that:
+
+Packets that enters the INSIDE interface that matches what's specified on the list (XLATE) will be translated from a pool of addresses from the pool test_pool.
+
+We will not use the overload command because it is specified "One-to-One" meaning one IP address to one IP address translation.
+
+Devices MUST not share the same OUTSIDE IP.
+
+
+VERIFY:
+
+@R3
+ping 192.168.100.1
+R3 was not configured with any routing, neither is R1 or R2. R3 was able to ping R1's loopback interface because of the NAT configurations.
+
+
+
+
+
+
+
+2. Configure R3 to dynamically receive an IP address on Ethernet0/2 from the DHCP server.
+
+@R3
+conf t
+ int e0/2
+  no shut
+  ip add dhcp
+  end
+Verify:
+
+Wait for a bit as the DHCP states takes place (Discover, Offer, Request, Acknowledge).
+Then,
+
+@R3
+show ip interface brief
+R3 MUST have the IP 10.1.3.11 on its e0/2 interface.
+
+Also, you can verify from R1 to check if it was really the one that gave the IP to R3.
+
+@R1
+show ip dhcp binding
+
+
+
+
+
+
+3. Configure R1 as an NTP server
+
+@R1
+conf t
+ ntp master 1
+ end
+and R2 as a client, not as a peer, using the IP address 10.1.2.1.
+
+@R2
+conf t
+ ntp server 10.1.2.1
+ end
+Verify:
+
+@R2
+show ntp status
+*NOTE: NTP takes a while to synchronize.
+
+
+
+
+
+
+
+4. Configure SSH access from R1 to R3, while excluding access via other remote connection protocols
+
+@R3
+conf t
+ line vty 0 4
+  transport input ssh
+  login local
+  end
+*NOTE: Devices in this simulation only have 5 vty lines (0-4)
+
+Older devices only had 5, recent ones more 16+
+
+To check how many vty lines a device has,
+
+@Cisco Device
+show run | s line
+Using the user root and password s3cret on router R3 using RSA and 1024 bits. Verify connectivity from router R1 to R3 using a destination address assigned to interface E0/2 on R3.
+
+@R3
+conf t
+ username root password s3cret
+ crypto key generate rsa modulus 1024 
+ end
+*NOTE: The specified username and password might be different so check carefully. Also, whether to use a secret or password command depends on what is being asked.
+
+If they asked that the password is a secret, or the password must be hashed with md5, then use the secret command.
+
+Verify connectivity using an SSH session from router R1 using a destination address of 10.1.3.11.
+Do NOT modify console access or line numbers to accomplish this task.
+
+@R1
+ssh -l root 10.1.3.11
+*Note: -l is L for login
+
+SAVE THE CONFIGURATIONS. (Do this only on the exam)
+
+@R1,R2,R3
+copy run start
+wr
+wr mem
